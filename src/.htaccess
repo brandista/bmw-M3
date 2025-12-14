@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /bemufix/
+  
+  # Jos tiedosto tai kansio olemassa, käytä sitä
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  
+  # Muuten ohjaa index.html:ään
+  RewriteRule ^ index.html [L]
+</IfModule>

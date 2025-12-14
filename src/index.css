@@ -1,0 +1,189 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 20% 97%;
+    --foreground: 220 20% 10%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 10%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 10%;
+    
+    /* BMW Blue - vibrant */
+    --primary: 211 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 220 15% 94%;
+    --secondary-foreground: 220 20% 20%;
+    
+    --muted: 220 15% 92%;
+    --muted-foreground: 220 10% 40%;
+    
+    --accent: 250 95% 60%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 211 100% 50%;
+    
+    --radius: 16px;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+    @apply tracking-tight;
+  }
+
+  ::selection {
+    @apply bg-primary text-primary-foreground;
+  }
+}
+
+@layer components {
+  /* Glassmorphism card */
+  .glass {
+    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-xl;
+  }
+
+  .glass-dark {
+    @apply bg-black/20 backdrop-blur-xl border border-white/10;
+  }
+
+  /* Gradient mesh backgrounds */
+  .mesh-gradient {
+    background: 
+      radial-gradient(at 40% 20%, hsla(211, 100%, 50%, 0.15) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsla(250, 95%, 60%, 0.1) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsla(211, 100%, 70%, 0.1) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, hsla(340, 100%, 70%, 0.08) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(211, 100%, 50%, 0.1) 0px, transparent 50%);
+  }
+
+  .mesh-gradient-dark {
+    background: 
+      radial-gradient(at 40% 20%, hsla(211, 100%, 50%, 0.3) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, hsla(250, 95%, 60%, 0.2) 0px, transparent 50%),
+      radial-gradient(at 0% 50%, hsla(211, 100%, 70%, 0.15) 0px, transparent 50%);
+  }
+
+  /* Glow effects */
+  .glow {
+    box-shadow: 
+      0 0 20px -5px hsla(211, 100%, 50%, 0.3),
+      0 0 40px -10px hsla(211, 100%, 50%, 0.2);
+  }
+
+  .glow-text {
+    text-shadow: 0 0 40px hsla(211, 100%, 50%, 0.5);
+  }
+
+  /* Animated gradient border */
+  .gradient-border {
+    position: relative;
+    background: linear-gradient(var(--background), var(--background)) padding-box,
+                linear-gradient(135deg, hsl(211, 100%, 50%), hsl(250, 95%, 60%), hsl(211, 100%, 50%)) border-box;
+    border: 2px solid transparent;
+  }
+
+  /* Noise texture overlay */
+  .noise {
+    position: relative;
+  }
+  
+  .noise::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+
+  /* Shimmer effect */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+    transform: translateX(-100%);
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Float animation */
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  /* Pulse glow */
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px -5px hsla(211, 100%, 50%, 0.4); }
+    50% { box-shadow: 0 0 40px -5px hsla(211, 100%, 50%, 0.6); }
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary;
+    background-size: 200% auto;
+    animation: gradient 3s linear infinite;
+  }
+
+  @keyframes gradient {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
