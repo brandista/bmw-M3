@@ -3,7 +3,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
-import path from 'path';
 import dotenv from 'dotenv';
 
 // Load environment variables
@@ -27,13 +26,21 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Security middleware
-app.use(helmet({
-  contentSecurityPolicy: false, // Disable for serving React app
-}));
+app.use(helmet());
+
+// CORS - Allow frontend from One.com
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
-  credentials: true
+  origin: [
+    'https://brandista.fi',
+    'https://www.brandista.fi',
+    'http://localhost:8080', // Local development
+    'http://localhost:3000'  // Local development
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(compression());
 
 // Body parsing middleware
@@ -44,16 +51,28 @@ app.use(cookieParser());
 // Rate limiting
 app.use(rateLimiter);
 
-// Serve static files from React app (frontend)
-app.use(express.static(path.join(__dirname, '../public')));
-
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    version: process.env.npm_package_version || '1.0.0'
+    version: process.env.npm_package_version || '1.0.0',
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Root endpoint info
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Bemufix API',
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      health: '/health',
+      chat: '/api/v2/chat',
+      vehicle: '/api/vehicle/:registration'
+    }
   });
 });
 
@@ -62,9 +81,18 @@ app.use('/api/vehicle', vehicleRouter);
 // app.use('/api/chat', chatRouter); // OpenAI chat - disabled
 app.use('/api/v2/chat', chatV2Router);
 
-// SPA fallback - serve index.html for all non-API routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+// 404 handler for undefined routes
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    message: `Route ${req.method} ${req.path} not found`,
+    availableEndpoints: [
+      'GET /health',
+      'GET /',
+      'POST /api/v2/chat',
+      'GET /api/vehicle/:registration'
+    ]
+  });
 });
 
 // Error handling middleware (must be last)
@@ -83,9 +111,10 @@ async function initializeServices() {
 
     // Start server
     app.listen(PORT, () => {
-      logger.info(`🚀 Bemufix Backend + Frontend running on port ${PORT}`);
+      logger.info(`🚀 Bemufix API running on port ${PORT}`);
       logger.info(`🔗 Environment: ${process.env.NODE_ENV || 'development'}`);
-      logger.info(`🌐 Domain: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
+      logger.info(`🌐 API URL: ${process.env.API_URL || 'http://localhost:5000'}`);
+      logger.info(`📡 Accepting requests from: brandista.fi`);
     });
 
   } catch (error) {
