@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import path from 'path';
 
 // Load environment variables
 dotenv.config();
@@ -28,11 +29,12 @@ const PORT = process.env.PORT || 5000;
 // Security middleware
 app.use(helmet());
 
-// CORS - Allow frontend from One.com
+// CORS - Allow frontend from Railway and One.com
 app.use(cors({
   origin: [
     'https://brandista.fi',
     'https://www.brandista.fi',
+    'https://bemufix-backend-production.up.railway.app',
     'http://localhost:8080', // Local development
     'http://localhost:3000'  // Local development
   ],
@@ -48,6 +50,9 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, '../public')));
+
 // Rate limiting
 app.use(rateLimiter);
 
@@ -62,37 +67,14 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Root endpoint info
-app.get('/', (req, res) => {
-  res.json({
-    name: 'Bemufix API',
-    version: '1.0.0',
-    status: 'running',
-    endpoints: {
-      health: '/health',
-      chat: '/api/v2/chat',
-      vehicle: '/api/vehicle/:registration'
-    }
-  });
-});
-
 // API routes
 app.use('/api/vehicle', vehicleRouter);
 // app.use('/api/chat', chatRouter); // OpenAI chat - disabled
 app.use('/api/v2/chat', chatV2Router);
 
-// 404 handler for undefined routes
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'Not Found',
-    message: `Route ${req.method} ${req.path} not found`,
-    availableEndpoints: [
-      'GET /health',
-      'GET /',
-      'POST /api/v2/chat',
-      'GET /api/vehicle/:registration'
-    ]
-  });
+// Catch-all route - serve frontend for all non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 // Error handling middleware (must be last)
