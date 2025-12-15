@@ -72,8 +72,12 @@ app.use('/api/vehicle', vehicleRouter);
 // app.use('/api/chat', chatRouter); // OpenAI chat - disabled
 app.use('/api/v2/chat', chatV2Router);
 
-// Catch-all route - serve frontend for all non-API routes
-app.get('*', (req, res) => {
+// Catch-all route - serve frontend for all non-API GET requests
+app.get('*', (req, res, next) => {
+  // Skip API routes
+  if (req.path.startsWith('/api/')) {
+    return next();
+  }
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
